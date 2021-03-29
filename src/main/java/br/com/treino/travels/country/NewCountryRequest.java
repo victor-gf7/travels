@@ -1,5 +1,6 @@
 package br.com.treino.travels.country;
 
+import br.com.treino.travels.validation.UniqueValue;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -9,6 +10,7 @@ public class NewCountryRequest {
 
     @JsonProperty
     @NotBlank
+    @UniqueValue(domainClass = Country.class, fieldName = "name")
     private final String name;
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)

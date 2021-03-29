@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -22,11 +23,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@AutoConfigureTestDatabase
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @AutoConfigureMockMvc
 @SpringBootTest
+@Transactional
 class CountryControllerTest {
-
 
     @Autowired
     private MockMvc mockMvc;
@@ -38,7 +39,7 @@ class CountryControllerTest {
     @Test
     @DisplayName("Must register a country")
     void test1() throws Exception {
-        NewCountryRequest request = new NewCountryRequest("Brazil");
+        NewCountryRequest request = new NewCountryRequest("Colombia");
 
         mockMvc.perform(
                 post("/api/v1/travels/countries")
@@ -50,7 +51,7 @@ class CountryControllerTest {
 
         ArgumentCaptor<Country> captor = ArgumentCaptor.forClass(Country.class);
         Mockito.verify(manager).persist(captor.capture());
-        assertEquals("Brazil", captor.getValue().getName());
+        assertEquals("Colombia", captor.getValue().getName());
     }
 
     @Test
@@ -66,6 +67,24 @@ class CountryControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$[?(@.field == 'name')].error").value("must not be blank"));
+    }
+
+    @Test
+    @DisplayName("Must not register a country with same name")
+    void test3() throws Exception {
+        Country country = new Country("Brazil");
+        manager.persist(country);
+
+        NewCountryRequest request = new NewCountryRequest("Brazil");
+
+        mockMvc.perform(
+                post("/api/v1/travels/countries")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$[?(@.field == 'name')].error").value("This registered value already exists"));
     }
 
 }

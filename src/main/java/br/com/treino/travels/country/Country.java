@@ -11,6 +11,7 @@ public class Country {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(updatable = false, unique = true, nullable = false)
     private UUID id;
 
     @NotBlank
