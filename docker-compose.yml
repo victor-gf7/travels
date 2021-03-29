@@ -1,0 +1,12 @@
+version: '3'
+services:
+
+  travelsdb:
+    image: mariadb
+    ports:
+      - 13306:3306
+    environment:
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: travels
+      MYSQL_USER: root
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
